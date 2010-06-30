@@ -11,7 +11,7 @@
 
 class Chargify {
 	protected $username 	= '';		// Chargify API Key
-	protected $domain 		= '';		// Chargify Subdomain
+	protected $domain 	= '';		// Chargify Subdomain
 	protected $password 	= 'x';
 	
 	public function get_customer($customer_id, $source = 'remote') {
