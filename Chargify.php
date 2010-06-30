@@ -6,7 +6,7 @@
  * A Chargify API class for CodeIgniter
  *
  * @author		Kyle Anderson <kyle@chargeigniter.com>
- * @link		http://www.chargeigniter.com
+ * @link		http://chargeigniter.com
  */
 
 class Chargify {
