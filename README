@@ -1,2 +1,16 @@
-Documentation
+DOCUMENTATION
+
 http://chargeigniter.com/
+
+
+INSTALLATION
+
+1. Download Chargify.php and place it in your 'libraries' folder.
+
+2. Load the class using the following:
+
+$this->load->library('chargify');
+
+3. Run whatever function you need to, e.g.:
+
+$this->chargify->get_customers();
