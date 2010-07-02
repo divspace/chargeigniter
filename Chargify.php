@@ -10,9 +10,11 @@
  */
 
 class Chargify {
-	protected $username 	= '';		// Chargify API Key
-	protected $domain 	= '';		// Chargify Subdomain
-	protected $password 	= 'x';
+	protected $username 	= '';			// Chargify API Key
+	protected $domain 	= '';			// Chargify Subdomain
+	protected $password 	= 'x';			// Chargify Password (do not change)
+	
+	var $debug 		= false;		// Show errors
 	
 	public function get_customer($customer_id, $source = 'remote') {
 		switch($source) {
@@ -561,58 +563,344 @@ class Chargify {
 	*************************************************************************************/
 	
 	public function error($errors, $code) {
-		$errors = json_decode($errors);
-		
-		switch($code) {
-			case 401:
-				$code 	= 'ERROR CODE 401: UNAUTHORIZED';
-				$detail = 'API authentication has failed. Please check your API key and make sure API access is enabled.';
-			break;
-			case 403:
-				$code 	= 'ERROR CODE 403: FORBIDDEN';
-				$detail = 'A valid request was made, but the API does not have this feature enabled for use.';
-			break;
-			case 404:
-				return false;
-			break;
-			case 405:
-				$code 	= 'ERROR CODE 405: METHOD NOT ALLOWED';
-				$detail = 'A request was made to a resource that does not support this method.';
-			break;
-			case 411:
-				$code 	= 'ERROR CODE 411: LENGTH REQUIRED';
-				$detail = 'The request did not specify the length of its content, which is required by the requested resource.';
-			break;
-			case 422:
-				$code  	= 'ERROR CODE 422: UNPROCESSABLE ENTITY';
-				$detail = 'A POST or PUT request was sent but is invalid or missing data.';
-			break;
-			case 500:
-				$code 	= 'ERROR CODE 500: INTERNAL SERVER ERROR';
-				$detail = 'A generic error message, given when no more specific message is suitable.';
-			break;
-			default:
-				$code 	= 'ERROR CODE UNKNOWN';
-				$detail = 'An error code was thrown that is not defined in the application.';
-			break;
-		}
-		
-		print '<pre>'."\n";
-		print '============================================================'."\n";
-		print $code."\n";
-		print '============================================================'."\n";
-		
-		if(isset($detail)) {
-			print "\n".wordwrap($detail, 60)."\n\n";
-		}
-		
-		if(isset($errors->errors)) {
-			foreach($errors->errors as $error) {
-				print wordwrap($error, 60)."\n";
+		if($this->debug) {
+			$errors = json_decode($errors);
+			
+			switch($code) {
+				case 401:
+					$code 	= 'ERROR CODE 401: UNAUTHORIZED';
+					$detail = 'API authentication has failed. Please check your API key and make sure API access is enabled.';
+				break;
+				case 403:
+					$code 	= 'ERROR CODE 403: FORBIDDEN';
+					$detail = 'A valid request was made, but the API does not have this feature enabled for use.';
+				break;
+				case 404:
+					return false;
+				break;
+				case 405:
+					$code 	= 'ERROR CODE 405: METHOD NOT ALLOWED';
+					$detail = 'A request was made to a resource that does not support this method.';
+				break;
+				case 411:
+					$code 	= 'ERROR CODE 411: LENGTH REQUIRED';
+					$detail = 'The request did not specify the length of its content, which is required by the requested resource.';
+				break;
+				case 422:
+					$code  	= 'ERROR CODE 422: UNPROCESSABLE ENTITY';
+					$detail = 'A POST or PUT request was sent but is invalid or missing data.';
+				break;
+				case 500:
+					$code 	= 'ERROR CODE 500: INTERNAL SERVER ERROR';
+					$detail = 'A generic error message, given when no more specific message is suitable.';
+				break;
+				default:
+					$code 	= 'ERROR CODE UNKNOWN';
+					$detail = 'An error code was thrown that is not defined in the application.';
+				break;
 			}
+			
+			print '<pre>'."\n";
+			print '============================================================'."\n";
+			print $code."\n";
+			print '============================================================'."\n";
+			
+			if(isset($detail)) {
+				print "\n".wordwrap($detail, 60)."\n\n";
+			}
+			
+			if(isset($errors->errors)) {
+				foreach($errors->errors as $error) {
+					print wordwrap($error, 60)."\n";
+				}
+			}
+			
+			print '</pre>'."\n\n";
 		}
+	}
+	
+	/************************************************************************************
+	 NON-API FUNCTIONS: Customer Information
+	*************************************************************************************/
+	
+	public function get_chargify_id($customer_id) {
+		$customer = $this->get_customer($customer_id, 'local');
 		
-		print '</pre>'."\n\n";
+		return $customer->id;
+	}
+	
+	public function get_reference_id($customer_id) {
+		$customer = $this->get_customer($customer_id);
+		
+		return $customer->reference;
+	}
+	
+	public function get_first_name($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->first_name;
+	}
+	
+	public function get_last_name($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->last_name;
+	}
+	
+	public function get_organization($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->organization;
+	}
+	
+	public function get_address_1($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->address;
+	}
+	
+	public function get_address_2($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->address_2;
+	}
+	
+	public function get_city($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->city;
+	}
+	
+	public function get_state($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->state;
+	}
+	
+	public function get_zip($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->zip;
+	}
+	
+	public function get_country($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->country;
+	}
+	
+	public function get_email($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->email;
+	}
+	
+	public function get_phone($customer_id, $source = 'remote') {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		return $customer->phone;
+	}
+	
+	public function get_timestamp($customer_id, $source = 'remote', $timestamp = array('created', 'updated')) {
+		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
+		
+		switch($timestamp) {
+			case 'created':
+				return strtotime($customer->created_at);
+			break;
+			case 'updated':
+				return strtotime($customer->updated_at);
+			break;
+		}
+	}
+	
+	/************************************************************************************
+	 NON-API FUNCTIONS: Product Information
+	*************************************************************************************/
+	
+	public function get_product_name($product_id, $source = 'remote') {
+		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
+
+		
+		return $product->name;
+	}
+	
+	public function get_product_handle($product_id, $source = 'remote') {
+		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
+		
+		return $product->handle;
+	}
+	
+	public function get_product_price($product_id, $source = 'remote', $convert_to_dollars = true) {
+		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
+		
+		if($convert_to_dollars) {
+			return ($product->price_in_cents / 100);
+		} else {
+			return $product->price_in_cents;
+		}
+	}
+	
+	public function get_product_description($product_id, $source = 'remote') {
+		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
+		
+		return $product->description;
+	}
+	
+	public function get_product_timestamp($product_id, $timestamp = array('created', 'updated', 'archived')) {
+		$product = $this->get_product($product_id);
+		
+		switch($timestamp) {
+			case 'created':
+				return strtotime($product->created_at);
+			break;
+			case 'updated':
+				return strtotime($product->updated_at);
+			break;
+			case 'archived':
+				return strtotime($product->expires_at);
+			break;
+		}
+	}
+	
+	/************************************************************************************
+	 NON-API FUNCTIONS: Subscription Information
+	*************************************************************************************/
+	
+	public function get_subscription_status($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		return $subscription->state;
+	}
+	
+	public function get_subscription_balance($subscription_id, $convert_to_dollars = true) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		if($convert_to_dollars) {
+			return ($subscription->balance_in_cents / 100);
+		} else {
+			return $subscription->balance_in_cents;
+		}
+	}
+	
+	public function get_subscription_timestamp($subscription_id, $timestamp = array('created', 'activated', 'updated', 'expiration')) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		switch($timestamp) {
+			case 'created':
+				return strtotime($subscription->created_at);
+			break;
+			case 'activated':
+				return strtotime($subscription->activated_at);
+			break;
+			case 'updated':
+				return strtotime($subscription->updated_at);
+			break;
+			case 'expiration':
+				return strtotime($subscription->expires_at);
+			break;
+		}
+	}
+	
+	public function get_subscription_cancellation_message($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		return $subscription->cancellation_message;
+	}
+	
+	/************************************************************************************
+	 NON-API FUNCTIONS: Credit Card Information
+	*************************************************************************************/
+	
+	public function get_card_number($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		return $subscription->credit_card->masked_card_number;
+	}
+	
+	public function get_card_type($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		return $subscription->credit_card->card_type;
+	}
+	
+	public function get_card_expiration_month($subscription_id, $add_zero = true) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		$expiration_month = $subscription->credit_card->expiration_month;
+		
+		if($add_zero) {
+			return (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month;
+		} else {
+			return $expiration_month;
+		}
+	}
+	
+	public function get_card_expiration_year($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		return $subscription->credit_card->expiration_year;
+	}
+	
+	public function get_card_details($subscription_id) {
+		$subscription = $this->get_subscription($subscription_id);
+		
+		$expiration_month = $subscription->credit_card->expiration_month;
+		
+		$card_array = array(
+			'number' 			=> $subscription->credit_card->masked_card_number,
+			'type' 				=> $subscription->credit_card->card_type,
+			'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
+			'expiration_year' 	=> $subscription->credit_card->expiration_year
+		);
+		
+		return $card_array;
+	}
+	
+	/************************************************************************************
+	 NON-API FUNCTIONS: Transaction Information
+	*************************************************************************************/
+	
+	public function get_charges($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('charge'), '', '', '', '', $page_number, $results_per_page);
+	}
+	
+	public function get_refunds($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('refund'), '', '', '', '', $page_number, $results_per_page);
+	}
+	
+	public function get_payments($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('payments'), '', '', '', '', $page_number, $results_per_page);
+	}
+	
+	public function get_credits($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('credits'), '', '', '', '', $page_number, $results_per_page);
+	}
+	
+	public function get_payment_authorizations($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('payment_authorization'), '', '', '', '', $page_number, $results_per_page);
+	}
+	
+	public function get_adjustments($page_number = 1, $results_per_page = 20) {
+		$page_number 		= (empty($page_number)) ? '1' : $page_number;
+		$results_per_page 	= (empty($results_per_page)) ? '20' : $results_per_page;
+		
+		return $this->get_transactions(array('adjustment'), '', '', '', '', $page_number, $results_per_page);
 	}
 }
 ?>
