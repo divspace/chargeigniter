@@ -5,8 +5,8 @@
  *
  * A Chargify API class for CodeIgniter
  *
- * @author		Kyle Anderson <kyle@chargeigniter.com>
- * @link		http://chargeigniter.com
+ * @author	Kyle Anderson <kyle@chargeigniter.com>
+ * @link	http://chargeigniter.com
  */
 
 class Chargify {
@@ -848,8 +848,8 @@ class Chargify {
 		$expiration_month = $subscription->credit_card->expiration_month;
 		
 		$card_array = array(
-			'number' 			=> $subscription->credit_card->masked_card_number,
-			'type' 				=> $subscription->credit_card->card_type,
+			'number' 		=> $subscription->credit_card->masked_card_number,
+			'type' 			=> $subscription->credit_card->card_type,
 			'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
 			'expiration_year' 	=> $subscription->credit_card->expiration_year
 		);
