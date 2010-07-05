@@ -10,11 +10,19 @@
  */
 
 class Chargify {
-	protected $username 	= '';			// Chargify API Key
-	protected $domain 	= '';			// Chargify Subdomain
-	protected $password 	= 'x';			// Chargify Password (do not change)
+	private $CI;				// CodeIgniter instance
 	
-	var $debug 		= false;		// Show errors
+	protected $username 	= '';		// Chargify API key
+	protected $domain 	= '';		// Chargify subdomain
+	protected $password 	= 'x';		// Chargify password (do not change)
+	
+	var $debug 		= false;	// Display errors
+	
+	public function __construct() {
+		$this->CI =& get_instance();
+		
+		log_message('debug', 'ChargeIgniter Class Initialized');
+	}
 	
 	public function get_customer($customer_id, $source = 'remote') {
 		switch($source) {
@@ -568,22 +576,22 @@ class Chargify {
 			
 			switch($code) {
 				case 401:
-					$code 	= 'ERROR CODE 401: UNAUTHORIZED';
+					$header = 'ERROR CODE 401: UNAUTHORIZED';
 					$detail = 'API authentication has failed. Please check your API key and make sure API access is enabled.';
 				break;
 				case 403:
-					$code 	= 'ERROR CODE 403: FORBIDDEN';
+					$header = 'ERROR CODE 403: FORBIDDEN';
 					$detail = 'A valid request was made, but the API does not have this feature enabled for use.';
 				break;
 				case 404:
 					return false;
 				break;
 				case 405:
-					$code 	= 'ERROR CODE 405: METHOD NOT ALLOWED';
+					$header = 'ERROR CODE 405: METHOD NOT ALLOWED';
 					$detail = 'A request was made to a resource that does not support this method.';
 				break;
 				case 411:
-					$code 	= 'ERROR CODE 411: LENGTH REQUIRED';
+					$header = 'ERROR CODE 411: LENGTH REQUIRED';
 					$detail = 'The request did not specify the length of its content, which is required by the requested resource.';
 				break;
 				case 422:
@@ -591,21 +599,25 @@ class Chargify {
 					$detail = 'A POST or PUT request was sent but is invalid or missing data.';
 				break;
 				case 500:
-					$code 	= 'ERROR CODE 500: INTERNAL SERVER ERROR';
+					$header = 'ERROR CODE 500: INTERNAL SERVER ERROR';
 					$detail = 'A generic error message, given when no more specific message is suitable.';
 				break;
 				default:
-					$code 	= 'ERROR CODE UNKNOWN';
+					$header = 'ERROR CODE UNKNOWN';
 					$detail = 'An error code was thrown that is not defined in the application.';
 				break;
 			}
 			
 			print '<pre>'."\n";
 			print '============================================================'."\n";
-			print $code."\n";
+			print $header."\n";
 			print '============================================================'."\n";
 			
 			if(isset($detail)) {
+				$this->CI =& get_instance();
+				
+				log_message('error', 'ChargeIgniter: '.$detail);
+				
 				print "\n".wordwrap($detail, 60)."\n\n";
 			}
 			
@@ -720,7 +732,6 @@ class Chargify {
 	
 	public function get_product_name($product_id, $source = 'remote') {
 		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
-
 		
 		return $product->name;
 	}
