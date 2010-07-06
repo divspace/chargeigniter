@@ -118,7 +118,11 @@ class Chargify {
 			$subscriptions = json_decode($result->response);
 			
 			if(count($subscriptions) > 0) {
-				return $subscriptions;
+				foreach($subscriptions as $subscription) {
+					$temp[] = $subscription->subscription;
+				}
+				
+				return $temp;
 			}
 			
 			return false;
@@ -175,6 +179,7 @@ class Chargify {
 	}
 	
 	/************************************************************************************
+
 	 Subscriptions
 	*************************************************************************************/
 	
@@ -217,8 +222,14 @@ class Chargify {
 		
 		$result = $this->query('/subscriptions.json', 'post', $data);
 		
-		if(isset($result->subscription)) {
-			return $result->subscription;
+		if($result->code == 201) {
+			$subscription = json_decode($result->response);
+			
+			if(count($subscription) == 1) {
+				return $subscription;
+			}
+			
+			return false;
 		}
 		
 		return $this->error($result->response, $result->code);
@@ -306,7 +317,7 @@ class Chargify {
 		return $this->error($result->response, $result->code);
 	}
 	
-	public function reset_subscription($subscription_id) {
+	public function reset_subscription_balance($subscription_id) {
 		$result = $this->query('/subscriptions/'.$subscription_id.'/reset_balance.json', 'put');
 		
 		if($result->code == 200) {
