@@ -5,8 +5,8 @@
  *
  * A Chargify API class for CodeIgniter
  *
- * @author	Kyle Anderson <kyle@chargeigniter.com>
- * @link	http://chargeigniter.com
+ * @author		Kyle Anderson <kyle@chargeigniter.com>
+ * @link		http://chargeigniter.com
  */
 
 class Chargify {
@@ -23,6 +23,14 @@ class Chargify {
 		
 		log_message('debug', 'ChargeIgniter Class Initialized');
 	}
+	
+	public function debug($status = false) {
+		$this->debug = $status;
+	}
+	
+	/************************************************************************************
+	 Customers
+	*************************************************************************************/
 	
 	public function get_customer($customer_id, $source = 'remote') {
 		switch($source) {
@@ -183,8 +191,8 @@ class Chargify {
 	 Subscriptions
 	*************************************************************************************/
 	
-	public function get_subscription($subscripton_id) {
-		$result = $this->query('/subscriptions/'.$subscripton_id.'.json');
+	public function get_subscription($subscription_id) {
+		$result = $this->query('/subscriptions/'.$subscription_id.'.json');
 		
 		if($result->code == 200) {
 			$subscription = json_decode($result->response);
@@ -215,6 +223,26 @@ class Chargify {
 		return $this->error($result->response, $result->code);
 	}
 	
+	public function get_subscription_transactions($subscription_id) {
+		$result = $this->query('/subscriptions/'.$subscription_id.'/transactions.json');
+		
+		if($result->code == 200) {
+			$transactions = json_decode($result->response);
+			
+			if(count($transactions) > 0) {
+				foreach($transactions as $transaction) {
+					$temp[] = $transaction->transaction;
+				}
+				
+				return $temp;
+			}
+			
+			return false;
+		}
+		
+		return $this->error($result->response, $result->code);
+	}
+	
 	public function create_subscription($data) {
 		$data = array(
 			'subscription' => $data
@@ -226,7 +254,7 @@ class Chargify {
 			$subscription = json_decode($result->response);
 			
 			if(count($subscription) == 1) {
-				return $subscription;
+				return $subscription->subscription;
 			}
 			
 			return false;
@@ -235,12 +263,12 @@ class Chargify {
 		return $this->error($result->response, $result->code);
 	}
 	
-	public function edit_subscription($subscripton_id, $data) {
+	public function edit_subscription($subscription_id, $data) {
 		$data = array(
 			'subscription' => $data
 		);
 		
-		$result = $this->query('/subscriptions/'.$subscripton_id.'.json', 'put', $data);
+		$result = $this->query('/subscriptions/'.$subscription_id.'.json', 'put', $data);
 		
 		if($result->code == 200) {
 			$subscription = json_decode($result->response);
@@ -275,7 +303,7 @@ class Chargify {
 		$this->error($result->response, $result->code);
 	}
 	
-	public function cancel_subscription($subscripton_id, $message = '') {
+	public function cancel_subscription($subscription_id, $message = '') {
 		if(!empty($message)) {
 			$data = array(
 				'subscription' => array(
@@ -283,9 +311,9 @@ class Chargify {
 				)
 			);
 			
-			$result = $this->query('/subscriptions/'.$subscripton_id.'.json', 'delete', $data);
+			$result = $this->query('/subscriptions/'.$subscription_id.'.json', 'delete', $data);
 		} else {
-			$result = $this->query('/subscriptions/'.$subscripton_id.'.json', 'delete');
+			$result = $this->query('/subscriptions/'.$subscription_id.'.json', 'delete');
 		}
 		
 		if($result->code == 200) {
@@ -337,12 +365,12 @@ class Chargify {
 	 Charges
 	*************************************************************************************/
 	
-	public function create_charge($subscripton_id, $data) {
+	public function create_charge($subscription_id, $data) {
 		$data = array(
 			'charge' => $data
 		);
 		
-		$result = $this->query('/subscriptions/'.$subscripton_id.'/charges.json', 'post', $data);
+		$result = $this->query('/subscriptions/'.$subscription_id.'/charges.json', 'post', $data);
 		
 		if($result->code == 201) {
 			$charge = json_decode($result->response);
@@ -525,19 +553,19 @@ class Chargify {
 	 Connector
 	*************************************************************************************/
 	
-	protected function query($uri, $method = 'GET', $data = '') {
+	protected function query($uri, $method = 'get', $data = '') {
 		$method = strtoupper($method);
 		
 		$curl_handler = curl_init();
 		
 		$options = array(
 			CURLOPT_URL 			=> 'https://'.$this->domain.'.chargify.com'.$uri,
-			CURLOPT_SSL_VERIFYPEER 		=> false,
-			CURLOPT_SSL_VERIFYHOST 		=> 2,
-			CURLOPT_FOLLOWLOCATION 		=> false,
+			CURLOPT_SSL_VERIFYPEER 	=> false,
+			CURLOPT_SSL_VERIFYHOST 	=> 2,
+			CURLOPT_FOLLOWLOCATION 	=> false,
 			CURLOPT_MAXREDIRS		=> 1,
-			CURLOPT_RETURNTRANSFER 		=> true,
-			CURLOPT_CONNECTTIMEOUT 		=> 10,
+			CURLOPT_RETURNTRANSFER 	=> true,
+			CURLOPT_CONNECTTIMEOUT 	=> 10,
 			CURLOPT_TIMEOUT 		=> 30,
 			CURLOPT_HTTPHEADER 		=> array('Content-Type: application/json', 'Accept: application/json'),
 			CURLOPT_USERPWD 		=> $this->username.':'.$this->password
@@ -554,8 +582,8 @@ class Chargify {
 		}
 		
 		if($data != '') {
-			$options[CURLOPT_POST] 		= true;
-			$options[CURLOPT_POSTFIELDS] 	= json_encode($data);
+			$options[CURLOPT_POST] = true;
+			$options[CURLOPT_POSTFIELDS] = json_encode($data);
 		}
 		
 		curl_setopt_array($curl_handler, $options);
@@ -676,7 +704,7 @@ class Chargify {
 		return $customer->organization;
 	}
 	
-	public function get_address_1($customer_id, $source = 'remote') {
+	public function get_address($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
 		return $customer->address;
@@ -870,8 +898,8 @@ class Chargify {
 		$expiration_month = $subscription->credit_card->expiration_month;
 		
 		$card_array = array(
-			'number' 		=> $subscription->credit_card->masked_card_number,
-			'type' 			=> $subscription->credit_card->card_type,
+			'number' 			=> $subscription->credit_card->masked_card_number,
+			'type' 				=> $subscription->credit_card->card_type,
 			'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
 			'expiration_year' 	=> $subscription->credit_card->expiration_year
 		);
