@@ -5,12 +5,12 @@
  *
  * A Chargify API class for CodeIgniter
  *
- * @author		Kyle Anderson <kyle@chargeigniter.com>
- * @link		http://chargeigniter.com
+ * @author	Kyle Anderson <kyle@chargeigniter.com>
+ * @link	http://chargeigniter.com
  */
 
 class Chargify {
-		private $CI;				// CodeIgniter instance
+	private $CI;				// CodeIgniter instance
 	
 	protected $username 	= '';		// Chargify API key
 	protected $domain 	= '';		// Chargify subdomain
