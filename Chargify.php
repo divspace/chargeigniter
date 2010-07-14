@@ -24,10 +24,6 @@ class Chargify {
 		log_message('debug', 'ChargeIgniter Class Initialized');
 	}
 	
-	public function debug($status = false) {
-		$this->debug = $status;
-	}
-	
 	/************************************************************************************
 	 Customers
 	*************************************************************************************/
