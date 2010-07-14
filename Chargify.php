@@ -10,7 +10,7 @@
  */
 
 class Chargify {
-	private $CI;				// CodeIgniter instance
+		private $CI;				// CodeIgniter instance
 	
 	protected $username 	= '';		// Chargify API key
 	protected $domain 	= '';		// Chargify subdomain
@@ -559,16 +559,16 @@ class Chargify {
 		$curl_handler = curl_init();
 		
 		$options = array(
-			CURLOPT_URL 			=> 'https://'.$this->domain.'.chargify.com'.$uri,
+			CURLOPT_URL 		=> 'https://'.$this->domain.'.chargify.com'.$uri,
 			CURLOPT_SSL_VERIFYPEER 	=> false,
 			CURLOPT_SSL_VERIFYHOST 	=> 2,
 			CURLOPT_FOLLOWLOCATION 	=> false,
-			CURLOPT_MAXREDIRS		=> 1,
+			CURLOPT_MAXREDIRS	=> 1,
 			CURLOPT_RETURNTRANSFER 	=> true,
 			CURLOPT_CONNECTTIMEOUT 	=> 10,
-			CURLOPT_TIMEOUT 		=> 30,
-			CURLOPT_HTTPHEADER 		=> array('Content-Type: application/json', 'Accept: application/json'),
-			CURLOPT_USERPWD 		=> $this->username.':'.$this->password
+			CURLOPT_TIMEOUT 	=> 30,
+			CURLOPT_HTTPHEADER 	=> array('Content-Type: application/json', 'Accept: application/json'),
+			CURLOPT_USERPWD 	=> $this->username.':'.$this->password
 		);
 		
 		switch($method) {
@@ -898,8 +898,8 @@ class Chargify {
 		$expiration_month = $subscription->credit_card->expiration_month;
 		
 		$card_array = array(
-			'number' 			=> $subscription->credit_card->masked_card_number,
-			'type' 				=> $subscription->credit_card->card_type,
+			'number' 		=> $subscription->credit_card->masked_card_number,
+			'type' 			=> $subscription->credit_card->card_type,
 			'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
 			'expiration_year' 	=> $subscription->credit_card->expiration_year
 		);
