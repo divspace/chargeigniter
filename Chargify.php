@@ -5,23 +5,18 @@
  *
  * A Chargify API class for CodeIgniter
  *
- * @author	Kyle Anderson <kyle@chargeigniter.com>
- * @link	http://chargeigniter.com
+ * @author		Kyle Anderson <kyle@chargeigniter.com>
+ * @link		http://chargeigniter.com
  */
 
 class Chargify {
-	private $CI;				// CodeIgniter instance
+	private $CI;						// CodeIgniter instance
 	
 	protected $username 	= '';		// Chargify API key
-	protected $domain 	= '';		// Chargify subdomain
+	protected $domain 		= '';		// Chargify subdomain
 	protected $password 	= 'x';		// Chargify password (do not change)
 	
-	var $debug 		= false;	// Display errors
-	
-	
-	/************************************************************************************
-	 Constructor
-	*************************************************************************************/
+	var $debug 				= false;	// Display errors
 	
 	public function __construct() {
 		$this->CI =& get_instance();
@@ -215,7 +210,11 @@ class Chargify {
 			$subscriptions = json_decode($result->response);
 			
 			if(count($subscriptions) > 0) {
-				return $subscriptions;
+				foreach($subscriptions as $subscription) {
+					$temp[] = $subscription->subscription;
+				}
+				
+				return $temp;
 			}
 			
 			return false;
@@ -491,11 +490,11 @@ class Chargify {
 			}
 		}
 		
-		if(is_int($start_id)) {
+		if(!empty($start_id)) {
 			$arguments .= '&since_id='.$start_id;
 		}
 		
-		if(is_int($end_id)) {
+		if(!empty($end_id)) {
 			$arguments .= '&max_id='.$end_id;
 		}
 		
@@ -540,8 +539,32 @@ class Chargify {
 		if($result->code == 201) {
 			$credit = json_decode($result->response);
 			
-			if(count($credit) == 1) {
+			if($credit->credit->success) {
 				return $credit->credit;
+			}
+			
+			return false;
+		}
+		
+		$this->error($result->response, $result->code);
+	}
+	
+	/************************************************************************************
+	 Refunds
+	*************************************************************************************/
+	
+	public function refund($subscription_id, $data) {
+		$data = array(
+			'refund' => $data
+		);
+		
+		$result = $this->query('/subscriptions/'.$subscription_id.'/refunds.json', 'post', $data);
+		
+		if($result->code == 201) {
+			$refund = json_decode($result->response);
+			
+			if(count($refund) == 1) {
+				return $refund->refund;
 			}
 			
 			return false;
@@ -560,16 +583,16 @@ class Chargify {
 		$curl_handler = curl_init();
 		
 		$options = array(
-			CURLOPT_URL 		=> 'https://'.$this->domain.'.chargify.com'.$uri,
+			CURLOPT_URL 			=> 'https://'.$this->domain.'.chargify.com'.$uri,
 			CURLOPT_SSL_VERIFYPEER 	=> false,
 			CURLOPT_SSL_VERIFYHOST 	=> 2,
 			CURLOPT_FOLLOWLOCATION 	=> false,
-			CURLOPT_MAXREDIRS	=> 1,
+			CURLOPT_MAXREDIRS		=> 1,
 			CURLOPT_RETURNTRANSFER 	=> true,
 			CURLOPT_CONNECTTIMEOUT 	=> 10,
-			CURLOPT_TIMEOUT 	=> 30,
-			CURLOPT_HTTPHEADER 	=> array('Content-Type: application/json', 'Accept: application/json'),
-			CURLOPT_USERPWD 	=> $this->username.':'.$this->password
+			CURLOPT_TIMEOUT 		=> 30,
+			CURLOPT_HTTPHEADER 		=> array('Content-Type: application/json', 'Accept: application/json'),
+			CURLOPT_USERPWD 		=> $this->username.':'.$this->password
 		);
 		
 		switch($method) {
@@ -678,92 +701,148 @@ class Chargify {
 	public function get_chargify_id($customer_id) {
 		$customer = $this->get_customer($customer_id, 'local');
 		
-		return $customer->id;
+		if($customer) {
+			return $customer->id;
+		}
+		
+		return false;
 	}
 	
 	public function get_reference_id($customer_id) {
 		$customer = $this->get_customer($customer_id);
 		
-		return $customer->reference;
+		if($customer) {
+			return $customer->reference;
+		}
+		
+		return false;
 	}
 	
 	public function get_first_name($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->first_name;
+		if($customer) {
+			return $customer->first_name;
+		}
+		
+		return false;
 	}
 	
 	public function get_last_name($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->last_name;
+		if($customer) {
+			return $customer->last_name;
+		}
+		
+		return false;
 	}
 	
 	public function get_organization($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->organization;
+		if($customer) {
+			return $customer->organization;
+		}
+		
+		return false;
 	}
 	
 	public function get_address($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->address;
+		if($customer) {
+			return $customer->address;
+		}
+		
+		return false;
 	}
 	
 	public function get_address_2($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->address_2;
+		if($customer) {
+			return $customer->address_2;
+		}
+		
+		return false;
 	}
 	
 	public function get_city($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->city;
+		if($customer) {
+			return $customer->city;
+		}
+		
+		return false;
 	}
 	
 	public function get_state($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->state;
+		if($customer) {
+			return $customer->state;
+		}
+		
+		return false;
 	}
 	
 	public function get_zip($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->zip;
+		if($customer) {
+			return $customer->zip;
+		}
+		
+		return false;
 	}
 	
 	public function get_country($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->country;
+		if($customer) {
+			return $customer->country;
+		}
+		
+		return false;
 	}
 	
 	public function get_email($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->email;
+		if($customer) {
+			return $customer->email;
+		}
+		
+		return false;
 	}
 	
 	public function get_phone($customer_id, $source = 'remote') {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		return $customer->phone;
+		if($customer) {
+			return $customer->phone;
+		}
+		
+		return false;
 	}
 	
 	public function get_timestamp($customer_id, $source = 'remote', $timestamp = array('created', 'updated')) {
 		$customer = ($source == 'local') ? $this->get_customer($customer_id, 'local') : $this->get_customer($customer_id);
 		
-		switch($timestamp) {
-			case 'created':
-				return strtotime($customer->created_at);
-			break;
-			case 'updated':
-				return strtotime($customer->updated_at);
-			break;
+		if($customer) {
+			switch($timestamp) {
+				case 'created':
+					return strtotime($customer->created_at);
+				break;
+				case 'updated':
+					return strtotime($customer->updated_at);
+				break;
+			}
 		}
+		
+		return false;
 	}
 	
 	/************************************************************************************
@@ -773,45 +852,65 @@ class Chargify {
 	public function get_product_name($product_id, $source = 'remote') {
 		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
 		
-		return $product->name;
+		if($product) {
+			return $product->name;
+		}
+		
+		return false;
 	}
 	
 	public function get_product_handle($product_id, $source = 'remote') {
 		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
 		
-		return $product->handle;
+		if($product) {
+			return $product->handle;
+		}
+		
+		return false;
 	}
 	
 	public function get_product_price($product_id, $source = 'remote', $convert_to_dollars = true) {
 		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
 		
-		if($convert_to_dollars) {
-			return ($product->price_in_cents / 100);
-		} else {
-			return $product->price_in_cents;
+		if($product) {
+			if($convert_to_dollars) {
+				return ($product->price_in_cents / 100);
+			} else {
+				return $product->price_in_cents;
+			}
 		}
+		
+		return false;
 	}
 	
 	public function get_product_description($product_id, $source = 'remote') {
 		$product = ($source == 'local') ? $this->get_product($product_id, 'local') : $this->get_product($product_id);
 		
-		return $product->description;
+		if($product) {
+			return $product->description;
+		}
+		
+		return false;
 	}
 	
 	public function get_product_timestamp($product_id, $timestamp = array('created', 'updated', 'archived')) {
 		$product = $this->get_product($product_id);
 		
-		switch($timestamp) {
-			case 'created':
-				return strtotime($product->created_at);
-			break;
-			case 'updated':
-				return strtotime($product->updated_at);
-			break;
-			case 'archived':
-				return strtotime($product->expires_at);
-			break;
+		if($product) {
+			switch($timestamp) {
+				case 'created':
+					return strtotime($product->created_at);
+				break;
+				case 'updated':
+					return strtotime($product->updated_at);
+				break;
+				case 'archived':
+					return strtotime($product->expires_at);
+				break;
+			}
 		}
+		
+		return false;
 	}
 	
 	/************************************************************************************
@@ -821,42 +920,58 @@ class Chargify {
 	public function get_subscription_status($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		return $subscription->state;
+		if($subscription) {
+			return $subscription->state;
+		}
+		
+		return false;
 	}
 	
 	public function get_subscription_balance($subscription_id, $convert_to_dollars = true) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		if($convert_to_dollars) {
-			return ($subscription->balance_in_cents / 100);
-		} else {
-			return $subscription->balance_in_cents;
+		if($subscription) {
+			if($convert_to_dollars) {
+				return ($subscription->balance_in_cents / 100);
+			} else {
+				return $subscription->balance_in_cents;
+			}
 		}
+		
+		return false;
 	}
 	
 	public function get_subscription_timestamp($subscription_id, $timestamp = array('created', 'activated', 'updated', 'expiration')) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		switch($timestamp) {
-			case 'created':
-				return strtotime($subscription->created_at);
-			break;
-			case 'activated':
-				return strtotime($subscription->activated_at);
-			break;
-			case 'updated':
-				return strtotime($subscription->updated_at);
-			break;
-			case 'expiration':
-				return strtotime($subscription->expires_at);
-			break;
+		if($subscription) {
+			switch($timestamp) {
+				case 'created':
+					return strtotime($subscription->created_at);
+				break;
+				case 'activated':
+					return strtotime($subscription->activated_at);
+				break;
+				case 'updated':
+					return strtotime($subscription->updated_at);
+				break;
+				case 'expiration':
+					return strtotime($subscription->expires_at);
+				break;
+			}
 		}
+		
+		return false;
 	}
 	
 	public function get_subscription_cancellation_message($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		return $subscription->cancellation_message;
+		if($subscription) {
+			return $subscription->cancellation_message;
+		}
+		
+		return false;
 	}
 	
 	/************************************************************************************
@@ -866,44 +981,69 @@ class Chargify {
 	public function get_card_number($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		return $subscription->credit_card->masked_card_number;
+		if($subscription) {
+			return $subscription->credit_card->masked_card_number;
+		}
+		
+		return false;
 	}
 	
 	public function get_card_type($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		return $subscription->credit_card->card_type;
+		if($subscription) {
+			return $subscription->credit_card->card_type;
+		}
+		
+		return false;
 	}
 	
 	public function get_card_expiration_month($subscription_id, $add_zero = true) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		$expiration_month = $subscription->credit_card->expiration_month;
-		
-		if($add_zero) {
-			return (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month;
-		} else {
-			return $expiration_month;
+		if($subscription) {
+			$expiration_month = $subscription->credit_card->expiration_month;
+			
+			if($add_zero) {
+				return (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month;
+			} else {
+				return $expiration_month;
+			}
 		}
+		
+		return false;
 	}
 	
 	public function get_card_expiration_year($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		return $subscription->credit_card->expiration_year;
+		if($subscription) {
+			return $subscription->credit_card->expiration_year;
+		}
+		
+		return false;
 	}
 	
 	public function get_card_details($subscription_id) {
 		$subscription = $this->get_subscription($subscription_id);
 		
-		$expiration_month = $subscription->credit_card->expiration_month;
-		
-		$card_array = array(
-			'number' 		=> $subscription->credit_card->masked_card_number,
-			'type' 			=> $subscription->credit_card->card_type,
-			'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
-			'expiration_year' 	=> $subscription->credit_card->expiration_year
-		);
+		if($subscription) {
+			$expiration_month = $subscription->credit_card->expiration_month;
+			
+			$card_array = (object) array(
+				'number' 			=> $subscription->credit_card->masked_card_number,
+				'type' 				=> ucfirst($subscription->credit_card->card_type),
+				'expiration_month' 	=> (strlen($expiration_month) == 1) ? '0'.$expiration_month : $expiration_month,
+				'expiration_year' 	=> $subscription->credit_card->expiration_year
+			);
+		} else {
+			$card_array = (object) array(
+				'number' 			=> '',
+				'type' 				=> '',
+				'expiration_month' 	=> '',
+				'expiration_year' 	=> ''
+			);
+		}
 		
 		return $card_array;
 	}
@@ -911,6 +1051,10 @@ class Chargify {
 	/************************************************************************************
 	 NON-API FUNCTIONS: Transaction Information
 	*************************************************************************************/
+	
+	public function get_transaction($transaction_id) {
+		return $this->get_transactions('', $transaction_id, $transaction_id, '', '', '', '');
+	}
 	
 	public function get_charges($page_number = 1, $results_per_page = 20) {
 		$page_number 		= (empty($page_number)) ? '1' : $page_number;
@@ -954,4 +1098,3 @@ class Chargify {
 		return $this->get_transactions(array('adjustment'), '', '', '', '', $page_number, $results_per_page);
 	}
 }
-?>
