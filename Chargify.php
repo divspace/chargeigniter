@@ -7,6 +7,7 @@
  *
  * @author		Kyle Anderson <kyle@chargeigniter.com>
  * @link		http://chargeigniter.com
+ * @link		http://www.crucialwebhost.com
  */
 
 class Chargify {
@@ -580,6 +581,8 @@ class Chargify {
 	protected function query($uri, $method = 'get', $data = '') {
 		$method = strtoupper($method);
 		
+		$content_length = ($data == '') ? 'Content-Length: 0' : '';
+		
 		$curl_handler = curl_init();
 		
 		$options = array(
@@ -591,7 +594,7 @@ class Chargify {
 			CURLOPT_RETURNTRANSFER 	=> true,
 			CURLOPT_CONNECTTIMEOUT 	=> 10,
 			CURLOPT_TIMEOUT 		=> 30,
-			CURLOPT_HTTPHEADER 		=> array('Content-Type: application/json', 'Accept: application/json'),
+			CURLOPT_HTTPHEADER 		=> array('Content-Type: application/json', $content_length, 'Accept: application/json'),
 			CURLOPT_USERPWD 		=> $this->username.':'.$this->password
 		);
 		
