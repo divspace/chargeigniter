@@ -49,7 +49,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function get_customers($page_number = 1) {
@@ -69,7 +69,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function create_customer($data) {
@@ -89,7 +89,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function edit_customer($customer_id, $data) {
@@ -160,7 +160,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function get_products() {
@@ -180,7 +180,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	/************************************************************************************
@@ -201,7 +201,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function get_subscriptions($page_number = 1, $results_per_page = 2000) {
@@ -221,7 +221,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function get_subscription_transactions($subscription_id) {
@@ -241,7 +241,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function create_subscription($data) {
@@ -261,7 +261,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function edit_subscription($subscription_id, $data) {
@@ -327,7 +327,7 @@ class Chargify {
 			return false;
 		}
 		
-		return $this->error($result->response, $result->code);
+		$this->error($result->response, $result->code);
 	}
 	
 	public function reactivate_subscription($subscription_id) {
