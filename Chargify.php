@@ -284,7 +284,7 @@ class Chargify {
 		$this->error($result->response, $result->code);
 	}
 	
-	public function upgrade_subscription($subcription_id, $data) {
+	public function upgrade_subscription($subscription_id, $data) {
 		$data = array(
 			'subscription' => $data
 		);
