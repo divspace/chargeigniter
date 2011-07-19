@@ -286,7 +286,9 @@ class Chargify {
 	
 	public function upgrade_subscription($subscription_id, $data) {
 		$data = array(
-			'subscription' => $data
+			'migration' => array(
+				'product_id' => $data
+			)
 		);
 		
 		$result = $this->query('/subscriptions/'.$subscription_id.'/migrations.json', 'post', $data);
