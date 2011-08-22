@@ -284,6 +284,26 @@ class Chargify {
 		$this->error($result->response, $result->code);
 	}
 	
+	public function edit_subscription_component_quantity($subscription_id, $component_id, $amount) {
+		$data = array(
+			'component' => $amount
+		);
+		
+		$result = $this->query('/subscriptions/'.$subscription_id.'/component/' . $component_id . '.json', 'put', $data);
+		
+		if($result->code == 200) {
+			$component = json_decode($result->response);
+			
+			if(count($component) == 1) {
+				return $component->component;
+			}
+			
+			return false;
+		}
+		
+		$this->error($result->response, $result->code);
+	}
+	
 	public function upgrade_subscription($subscription_id, $data) {
 		$data = array(
 			'migration' => array(
