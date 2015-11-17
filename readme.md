@@ -13,5 +13,5 @@ $this->load->library('chargify');
 Run whatever function you need to, e.g.:
 
 ````php
-$this->chargify->get_customers();
+$this->chargify->getCustomers();
 ````
