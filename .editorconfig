@@ -1,0 +1,34 @@
+root = true
+
+[*]
+charset = utf-8
+draw_white_space = all
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+quote_type = single
+trim_trailing_whitespace = true
+trim_trailing_white_space_on_save = true
+curly_bracket_next_line = false
+indent_brace_style = "K&R"
+spaces_around_brackets = false
+spaces_around_operators = true
+
+[*.{jade,php,py}]
+indent_size = 4
+
+[*.blade.php]
+indent_size = 2
+
+[*.{json,yml}]
+quote_type = double
+
+[.htaccess]
+indent_size = 4
+quote_type = double
+
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false
+trim_trailing_white_space_on_save = false
